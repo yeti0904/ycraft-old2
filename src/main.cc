@@ -33,7 +33,7 @@ int main(void) {
 	game.LoadDefaultBlockdefs();
 	game.LoadPlayerSkin("default");
 
-	game.level.Generate(128, 128);
+	game.level.Generate(24, 24);
 	Util::Log("Started level gen (width: %d, height: %d)", game.level.w, game.level.h);
 
 	while (true) {

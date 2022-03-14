@@ -73,6 +73,8 @@ void Game::Init(string title) {
 		player.inventory[i] = i + 1;
 	}
 	player.heldBlock    = 0;
+	player.position.x   = APP_WINDOW_W / 2;
+	player.position.y   = APP_WINDOW_H / 2;
 }
 
 void Game::Update() {
@@ -109,16 +111,34 @@ void Game::Update() {
 
 	const Uint8* keystate = SDL_GetKeyboardState(NULL);
 	if (keystate[SDL_SCANCODE_W]) {
-		-- player.position.y;
+		if (player.position.y > 0) {
+			-- player.position.y;
+			-- camera.y;
+		}
+		else {
+			player.position.y = 0;
+		}
 	}
 	if (keystate[SDL_SCANCODE_S]) {
-		++ player.position.y;
+		if (player.position.y < (level.h * BLOCK_SIZE) - 1 - BLOCK_SIZE) {
+			++ player.position.y;
+			++ camera.y;
+		}
 	}
 	if (keystate[SDL_SCANCODE_A]) {
-		-- player.position.x;
+		if (player.position.x > 0) {
+			-- player.position.x;
+			-- camera.x;
+		}
+		else {
+			player.position.x = 0;
+		}
 	}
 	if (keystate[SDL_SCANCODE_D]) {
-		++ player.position.x;
+		if (player.position.x < (level.w * BLOCK_SIZE) - 1 - BLOCK_SIZE) {
+			++ player.position.x;
+			++ camera.x;
+		}
 	}
 	if (keystate[SDL_SCANCODE_1]) {
 		player.heldBlock = 0;
