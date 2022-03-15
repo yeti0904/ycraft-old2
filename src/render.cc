@@ -87,17 +87,25 @@ void Game::Render() {
 		// render inventory
 		{
 			size_t startX = (APP_WINDOW_W / 2) - ((BLOCK_SIZE * player.inventory.size()) / 2);
-			size_t startY = APP_WINDOW_H - (BLOCK_SIZE + 1);
+			size_t startY = APP_WINDOW_H - (BLOCK_SIZE + 6);
+
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+			SDL_Rect background;
+			background.x = startX;
+			background.y = startY;
+			background.w = BLOCK_SIZE * player.inventory.size();
+			background.h = BLOCK_SIZE;
+			SDL_RenderFillRect(renderer, &background);
 
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 			for (size_t i = 0; i<player.inventory.size(); ++i) {
-				block.x = startX + (i * BLOCK_SIZE);
+				block.x = startX + (i * BLOCK_SIZE) ;
 				block.y = startY;
 				block_src.x = Util::GetTexturePosition(blockdefs.Get(player.inventory[i]).textureID, texturePack).x;
 				block_src.y = Util::GetTexturePosition(blockdefs.Get(player.inventory[i]).textureID, texturePack).y;
 				SDL_RenderCopy(renderer, texturePack, &block_src, &block);
-				if (i == player.heldBlock) {
+				if ((int)i == player.heldBlock) {
 					SDL_RenderDrawRect(renderer, &block);
 				}
 			}
@@ -108,6 +116,12 @@ void Game::Render() {
 			inventoryOutline.w = BLOCK_SIZE * player.inventory.size() + 2;
 			inventoryOutline.h = BLOCK_SIZE + 2;
 			SDL_SetRenderDrawColor(renderer, 222, 222, 222, 255);
+			SDL_RenderDrawRect(renderer, &inventoryOutline);
+			-- inventoryOutline.x;
+			-- inventoryOutline.y;
+			inventoryOutline.w += 2;
+			inventoryOutline.h += 2;
+			SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 			SDL_RenderDrawRect(renderer, &inventoryOutline);
 		}
 

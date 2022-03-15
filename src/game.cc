@@ -106,6 +106,21 @@ void Game::Update() {
 				}
 				break;
 			}
+			case SDL_MOUSEWHEEL: {
+				if (event.wheel.y > 0) { // scroll up
+					-- player.heldBlock;
+					if (player.heldBlock < 0) {
+						player.heldBlock = player.inventory.size() - 1;
+					}
+				}
+				else if (event.wheel.y < 0) { // scroll down
+					++ player.heldBlock;
+					if (player.heldBlock >= (int)player.inventory.size()) {
+						player.heldBlock = 0;
+					}
+				}
+				break;
+			}
 		}
 	};
 

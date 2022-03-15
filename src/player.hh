@@ -7,7 +7,7 @@ struct Player {
 	uint8_t             health;
 	UVec2               position;
 	array <uint16_t, 9> inventory;
-	uint8_t             heldBlock;
+	int8_t              heldBlock;
 	SDL_Texture*        skin;
 	uint8_t             velocity;
 };
