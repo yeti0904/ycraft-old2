@@ -35,19 +35,24 @@ Game::Game() {
 
 	mouseLeftPressed  = false;
 	mouseRightPressed = false;
+	mousePos.x        = 0;
+	mousePos.y        = 0;
 }
 
 Game::~Game() {
-	Util::Log("Exit");
+	Util::Log("Exit (from destructor)");
 
-	if (renderer == NULL) {
+	if (renderer != NULL) {
 		SDL_DestroyRenderer(renderer);
 	}
-	if (window == NULL) {
+	if (window != NULL) {
 		SDL_DestroyWindow(window);
 	}
 	if (texturePack != NULL) {
 		SDL_DestroyTexture(texturePack);
+	}
+	if (player.skin != NULL) {
+		SDL_DestroyTexture(player.skin);
 	}
 	
 	IMG_Quit();
@@ -75,6 +80,8 @@ void Game::Init(string title) {
 	player.heldBlock    = 0;
 	player.position.x   = APP_WINDOW_W / 2;
 	player.position.y   = APP_WINDOW_H / 2;
+	camera.x            = 0;
+	camera.y            = 0;
 }
 
 void Game::Update() {
@@ -227,6 +234,7 @@ void Game::LoadDefaultBlockdefs() {
 	blockdefs.AddNewBlockdef(11, "water", 10, BlockType::Liquid);
 	blockdefs.AddNewBlockdef(12, "lava", 11, BlockType::Liquid);
 	blockdefs.AddNewBlockdef(13, "bricks", 12, BlockType::Solid);
+	blockdefs.AddNewBlockdef(14, "rock", 13, BlockType::SemiSolid);
 }
 
 void Game::LoadPlayerSkin(string name) {

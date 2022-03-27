@@ -8,6 +8,9 @@ unordered_map <blockCoordinate, unordered_map <blockCoordinate, uint16_t>>& fron
 		for (blockCoordinate x = 0; x<w; ++x) {
 			backLayer[x][y] = 1;
 			frontLayer[x][y] = 0;
+			if (rand() % 25 == 1) {
+				frontLayer[x][y] = 14; // rock
+			}
 		}
 	}
 	isGenerated = true;

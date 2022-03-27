@@ -23,13 +23,18 @@ void Game::Render() {
 			for (blockCoordinate x = 0; (x<=max.x) && (x<level.w); ++x) {
 				block.x = (x * BLOCK_SIZE) - camera.x;
 				block.y = (y * BLOCK_SIZE) - camera.y;
-				if ((level.backLayer[x][y] != 0) && (level.frontLayer[x][y] == 0)) {
+				if ((blockdefs.Get(level.backLayer[x][y]).type != BlockType::Gas) && 
+					(
+						(blockdefs.Get(level.frontLayer[x][y]).type == BlockType::Gas) ||
+						(blockdefs.Get(level.frontLayer[x][y]).type == BlockType::SemiSolid)
+					)
+				) {
 					UVec2 src = Util::GetTexturePosition(blockdefs.Get(level.backLayer[x][y]).textureID, texturePack);
 					block_src.x = src.x;
 					block_src.y = src.y;
 					SDL_RenderCopy(renderer, texturePack, &block_src, &block);
 				}
-				if (level.frontLayer[x][y] != 0) {
+				if (blockdefs.Get(level.frontLayer[x][y]).type != BlockType::Gas) {
 					UVec2 src = Util::GetTexturePosition(blockdefs.Get(level.frontLayer[x][y]).textureID, texturePack);
 					block_src.x = src.x;
 					block_src.y = src.y;
@@ -39,11 +44,11 @@ void Game::Render() {
 		}
 
 		// loop through front layer to do outlines
-		for (blockCoordinate x = 0; x<level.w; ++x) {
-			for (blockCoordinate y = 0; y<level.h; ++y) {
+		for (blockCoordinate x = 0; (x<max.x) && (x<level.w); ++x) {
+			for (blockCoordinate y = 0; (y<max.y) && (y<level.h); ++y) {
 				block.x = (x * BLOCK_SIZE) - camera.x;
 				block.y = (y * BLOCK_SIZE) - camera.y;
-				if (level.frontLayer[x][y] != 0) {
+				if (blockdefs.Get(level.frontLayer[x][y]).type == BlockType::Solid) {
 					SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 					if (level.frontLayer[x - 1][y] == 0) {
 						SDL_RenderDrawLine(renderer, block.x, block.y, block.x, block.y + BLOCK_SIZE - 1);
@@ -68,21 +73,10 @@ void Game::Render() {
 		}
 
 		// render player
-		{
-			block.x = player.position.x - camera.x;
-			block.y = player.position.y - camera.y;
-			SDL_Rect crop;
-			crop.x = 0;
-			crop.y = 0;
-			crop.w = BLOCK_SIZE;
-			crop.h = BLOCK_SIZE;
-			if (blockdefs.Get(level.backLayer[player.position.x / BLOCK_SIZE][player.position.y / BLOCK_SIZE]).type == BlockType::Liquid) {
-				block.h /= 2;
-				crop.h  /= 2;
-			}
-			SDL_RenderCopy(renderer, player.skin, &block_src, &block);
-			block.h = BLOCK_SIZE;
-		}
+		block.x = player.position.x - camera.x;
+		block.y = player.position.y - camera.y;
+		//printf("%d %d (%d - %d) (%d - %d)\n", block.x, block.y, player.position.x, camera.x, player.position.y, camera.y);
+		SDL_RenderCopy(renderer, player.skin, NULL, &block);
 
 		// render inventory
 		{

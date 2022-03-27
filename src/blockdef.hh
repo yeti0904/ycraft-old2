@@ -4,7 +4,8 @@
 enum class BlockType {
 	Gas,
 	Solid,
-	Liquid
+	Liquid,
+	SemiSolid
 };
 
 struct Blockdef {
