@@ -30,8 +30,10 @@ using std::vector;
 using std::thread;
 using std::ifstream;
 using std::ofstream;
+using std::to_string;
 using std::unordered_map;
 
 // C libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>

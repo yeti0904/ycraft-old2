@@ -11,6 +11,10 @@ Game::Game() {
 		printf("IMG_Init Error: %s\n", IMG_GetError());
 		exit(1);
 	}
+	if (TTF_Init() != 0) {
+		printf("TTF_Init Error: %s\n", TTF_GetError());
+		exit(1);
+	}
 	gamePath = Util::GetExecutableLocation();
 	if (gamePath == "") {
 		Util::Log("Error getting executable location");
@@ -32,11 +36,25 @@ Game::Game() {
 	camera.x          = 0;
 	camera.y          = 0;
 	player.velocity   = 0;
+	
+	gameState.inventoryOpen    = false;
+	gameState.playerCanMove    = true;
+	gameState.titleScreen      = true;
+	gameState.titleScreenState = TitleScreenState::MenuScreen;
 
 	mouseLeftPressed  = false;
 	mouseRightPressed = false;
 	mousePos.x        = 0;
 	mousePos.y        = 0;
+
+	loadingScreenScroll = 0;
+
+	// set up UI
+	mainMenu.playButton.rect.x = (APP_WINDOW_W / 2) - 200;
+	mainMenu.playButton.rect.y = 50;
+	mainMenu.playButton.rect.w = 400;
+	mainMenu.playButton.rect.h = 20;
+	mainMenu.playButton.text   = "Play";
 }
 
 Game::~Game() {
@@ -53,6 +71,9 @@ Game::~Game() {
 	}
 	if (player.skin != NULL) {
 		SDL_DestroyTexture(player.skin);
+	}
+	if (font != NULL) {
+		TTF_CloseFont(font);
 	}
 	
 	IMG_Quit();
@@ -73,6 +94,13 @@ void Game::Init(string title) {
 	SDL_RenderSetLogicalSize(renderer, APP_WINDOW_W, APP_WINDOW_H);
 
 	SDL_ShowCursor(SDL_DISABLE);
+
+	string fontPath = gameParentFolder + "/fonts/default.ttf";
+	font = TTF_OpenFont(fontPath.c_str(), 10);
+	if (font == NULL) {
+		printf("TTF_OpenFont Error: %s\n", TTF_GetError());
+		exit(1);
+	}
 
 	for (size_t i = 0; i<player.inventory.size(); ++i) {
 		player.inventory[i] = i + 1;

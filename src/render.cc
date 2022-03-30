@@ -2,11 +2,148 @@
 #include "util.hh"
 #include "constants.hh"
 
+void Game::RenderText(string text, size_t x, size_t y, size_t scale) {
+	if (font == NULL) {
+		printf("Error: font is NULL\n(called from Game::RenderText)\n");
+		exit(1);
+	}
+	/*if (text == "") {
+		char* s = "lol";
+		*s = 'a';
+	}*/
+	SDL_Colour colour = {0, 0, 0, 100};
+	SDL_Rect   renderAt;
+
+	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), colour);
+	if (textSurface == NULL) {
+		printf("SDL2_ttf Error: %s (\"%s\", %d, %d, %d)\n", TTF_GetError(), text.c_str(), (int)x, (int)y, (int)scale);
+		exit(1);
+	}
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+	SDL_QueryTexture(textTexture, NULL, NULL, &renderAt.w, &renderAt.h);
+	renderAt.x  = x;
+	renderAt.y  = y;
+	renderAt.w *= scale;
+	renderAt.h *= scale;
+
+	SDL_RenderCopy(renderer, textTexture, NULL, &renderAt);
+	SDL_DestroyTexture(textTexture);
+	SDL_FreeSurface(textSurface);
+
+	colour = {255, 255, 255, 255};
+	textSurface = TTF_RenderText_Solid(font, text.c_str(), colour);
+	textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+	SDL_RenderCopy(renderer, textTexture, NULL, &renderAt);
+
+	SDL_DestroyTexture(textTexture);
+	SDL_FreeSurface(textSurface);
+}
+
+SDL_Rect Game::GetTextSize(string text, size_t scale) {
+	SDL_Colour   colour;
+	SDL_Surface* surface;
+	SDL_Texture* texture;
+	SDL_Rect     ret;
+
+	colour  = {255, 255, 255, 255};
+
+	if (font == NULL) {
+		printf("Error: game font is NULL (Game::GetTextSize)\n");
+		exit(1);
+	}
+
+	surface = TTF_RenderText_Solid(font, text.c_str(), colour);
+	// valgrind is giving me so many errors and its all coming from the above line
+	if (surface == NULL) {
+		printf("SDL2_ttf Error: %s (%s %d)\n", TTF_GetError(), text.c_str(), (int)scale);
+		exit(1);
+	}
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+	SDL_QueryTexture(texture, NULL, NULL, &ret.w, &ret.h);
+	ret.w *= scale;
+	ret.h *= scale;
+
+	SDL_DestroyTexture(texture);
+	SDL_FreeSurface(surface);
+
+	return ret;
+}
+
+void Game::RenderBackground() {
+	UVec2 dirtPos = Util::GetTexturePosition(blockdefs.Get(2).textureID, texturePack);
+	SDL_Rect src;
+	src.x = dirtPos.x;
+	src.y = dirtPos.y;
+	src.w = BLOCK_SIZE;
+	src.h = BLOCK_SIZE;
+	SDL_Rect block;
+	block.w = BLOCK_SIZE;
+	block.h = BLOCK_SIZE;
+	for (size_t i = 0; i < (APP_WINDOW_H / BLOCK_SIZE) + 2; ++i) {
+		for (size_t j = 0; j < (APP_WINDOW_W / BLOCK_SIZE) + 2; ++j) {
+			block.x = j * BLOCK_SIZE;
+			block.y = (i * BLOCK_SIZE) - loadingScreenScroll;
+			SDL_RenderCopy(renderer, texturePack, &src, &block);
+		}
+	}
+}
+
 void Game::Render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	if (level.isGenerated) {
+	if (gameState.titleScreen) {
+		RenderBackground();
+		switch (gameState.titleScreenState) {
+			case TitleScreenState::MenuScreen: {
+				// render main stuff
+				string logoText = "ycraft";
+				SDL_Rect position = GetTextSize(logoText.c_str(), 4);
+				position.x = (APP_WINDOW_W / 2) - (position.w / 2);
+				position.y = 10;
+				RenderText(logoText, position.x, position.y, 2);
+
+				// render ui
+				mainMenu.playButton.Render(*this);
+				break;
+			}
+			case TitleScreenState::NewWorldScreen: {
+				break;
+			}
+		}
+	}
+
+	else if (!level.isGenerated) {
+		// render background
+		++ loadingScreenScroll;
+		if (loadingScreenScroll >= 16) {
+			loadingScreenScroll = 0;
+		}
+		RenderBackground();
+
+		// render text
+		string loadingText = "Generating level";
+		SDL_Rect position = GetTextSize(loadingText.c_str(), 2);
+		position.x = (APP_WINDOW_W / 2) - (position.w / 2);
+		position.y = (APP_WINDOW_H / 2) - (position.h / 2);
+		RenderText(loadingText, position.x, position.y, 2);
+
+		// render progress bar
+		SDL_Rect bar;
+		bar.x = (APP_WINDOW_W / 2) - 50;
+		bar.y = position.y + position.h + 10;
+		bar.w = 100;
+		bar.h = 10;
+		SDL_SetRenderDrawColor(renderer, 33, 33, 33, 255);
+		SDL_RenderFillRect(renderer, &bar);
+		SDL_SetRenderDrawColor(renderer,78, 207, 71, 255);
+		bar.w = level.percentGenerated;
+		SDL_RenderFillRect(renderer, &bar);
+	}
+
+	else if (level.isGenerated) {
 		// render level
 		SDL_Rect block;
 		SDL_Rect block_src;
@@ -127,6 +264,7 @@ void Game::Render() {
 		SDL_RenderDrawLine(renderer, mousePos.x, mousePos.y + 1, mousePos.x, mousePos.y + 3);
 	}
 
+	//RenderText("ycraft beta", 10, 10, 1);
 
 	SDL_RenderPresent(renderer);
 }

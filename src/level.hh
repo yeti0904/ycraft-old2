@@ -12,7 +12,8 @@ enum class Biome {
 class Level {
 	public:
 		uint32_t w, h;
-		bool   isGenerated;
+		bool     isGenerated;
+		uint8_t  percentGenerated;
 
 		unordered_map <blockCoordinate, unordered_map <blockCoordinate, uint16_t>> frontLayer;
 		unordered_map <blockCoordinate, unordered_map <blockCoordinate, uint16_t>> backLayer;

@@ -92,7 +92,10 @@ bool Util::CheckFolders(string gamePath) {
 		FS::Directory::Exists(gamePath + "/fonts") &&
 		FS::Directory::Exists(gamePath + "/maps") &&
 		FS::Directory::Exists(gamePath + "/skins") &&
-		FS::File::Exists(gamePath + "/options.properties")
+		FS::File::Exists(gamePath + "/options.properties") &&
+		FS::File::Exists(gamePath + "/fonts/default.ttf") &&
+		FS::File::Exists(gamePath + "/texpacks/default.png") &&
+		FS::File::Exists(gamePath + "/skins/default.png")
 	);
 }
 
