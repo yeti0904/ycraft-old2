@@ -1,3 +1,4 @@
+# dead project
 # ycraft
 2D top down block sandbox game
 <img src="pic/ycraft1.png">
